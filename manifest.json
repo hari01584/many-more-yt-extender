@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+
+  "name": "many-more-yt-extender",
+  "version": "1.0.0",
+  "description": "Extends youtube website to add other providers video!",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [{
+  "matches": ["http://www.youtube.com/*","https://www.youtube.com/*"],
+  "js": ["myscript.js"],
+  "run_at": "document_start"
+  }],
+  "action": {
+    "default_title": "Set video source",
+    "default_popup": "popup.html"
+  },
+  "web_accessible_resources": [{
+   "resources": ["template_item.html", "gogoanime/main.js"],
+   "matches": ["<all_urls>"],
+   "extension_ids": []
+  }],
+  "host_permissions": [
+    "https://*/*"
+  ],
+  "permissions": [
+    "storage"
+  ]
+}

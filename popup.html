@@ -1,0 +1,37 @@
+<!-- popup.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    html {
+      min-height: 5em;
+      min-width: 10em;
+    }
+    .btn {
+    margin-top: 5px;
+    width:100%;
+    }
+  </style>
+</head>
+<body>
+
+  Source:
+  <select id="source">
+   <option selected="selected" value="YouTube">YouTube</option>
+   <option value="gogoanime">Gogoanime</option>
+   <!-- <option value="s2">s2</option>
+   <option value="s3">s3</option>
+   <option value="s4">s4</option> -->
+  </select>
+
+  <label>
+    <input type="checkbox" id="isenable">
+    Enable Extension
+  </label>
+
+  <div id="status"></div>
+  <button id="save" class="btn">Save</button>
+
+  <script src="scriptOptions.js"></script>
+</body>
+</html>
