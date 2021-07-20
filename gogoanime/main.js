@@ -23,7 +23,7 @@ function webScrapeImage(response) {
 export const search = (query, csb) => {
   //doc.querySelectorAll("ytd-video-renderer").forEach(node => node.remove());
   var search = base + "/search/" + encodeURIComponent(query);
-  console.log("Searching "+search);
+  console.log("Searching " + search);
   chrome.runtime.sendMessage(
     {
       contentScriptQuery: "getScrape",
@@ -88,19 +88,11 @@ const buildWatchMainPage = (pageData) => {
     .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
     .trim();
 
-  let episode_list = [];
-  let items = doc
-    .querySelectorAll("#episode_related > li")
-    .forEach(function (node, index) {
-      let t = {
-        epLink: base + node.querySelector("a").getAttribute("href"),
-        epName: node
-          .querySelector("a > div.name")
-          .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
-          .trim(),
-      };
-      episode_list.push(t);
-    });
+  let firstEpLink =
+    base +
+    doc
+      .querySelector("#episode_related > li:nth-child(1) > a")
+      .getAttribute("href");
 
   let info = {
     image: img,
@@ -111,7 +103,7 @@ const buildWatchMainPage = (pageData) => {
     animeReleased: animeReleased,
     animeStatus: animeStatus,
     animeOtherName: animeOtherName,
-    animeEpisodes: episode_list,
+    firstEpLink: firstEpLink,
   };
 
   return info;
@@ -126,22 +118,63 @@ const buildWatchAnimePage = (pageData) => {
   ).innerHTML;
 
   let vidLink = doc.querySelector("#playerframe").src;
+  let episode_list = [];
+  var capture = false;
+  let items = doc
+    .querySelectorAll("#episode_related > li")
+    .forEach(function (node, index) {
+      let cname = node.querySelector("a").className;
+
+      if (cname == "active") {
+        capture = true;
+        return;
+      } else if (!capture) return;
+
+      let t = {
+        epLink: node.querySelector("a").getAttribute("href"),
+        epName: node
+          .querySelector("a > div.name")
+          .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
+          .trim(),
+      };
+      episode_list.push(t);
+    });
 
   let epData = {
     title: title,
     video: vidLink,
+    animeEpisodes: episode_list,
   };
   return epData;
 };
 
-function _mergeAndExecute(animeEpisodePage, animeInfoPage, csb){
+function _mergeAndExecute(animeEpisodePage, animeInfoPage, csb) {
   let page = {
     video: animeEpisodePage?.video,
-    hashtags: animeEpisodePage?.animeGenre,
+    hashtags: animeInfoPage?.animeGenre,
     title: animeEpisodePage?.title,
-    desc: animeInfoPage?.animePlot
+    desc:
+      animeInfoPage?.animePlot +
+      "\n\n{0}\n{1}\n{2}\n{3}".format(
+        animeInfoPage?.animeType,
+        animeInfoPage?.animeReleased,
+        animeInfoPage?.animeStatus,
+        animeInfoPage?.animeOtherName
+      ),
   };
+  page.desc += "\n\nEpisodes:\n";
 
+  var url_string = window.location.href;
+  console.log(url_string);
+  var url = new URL(url_string);
+  var search_params = url.searchParams;
+
+  animeEpisodePage?.animeEpisodes.forEach(function (ep, index) {
+    search_params.set('t', ep.epLink.split('/').slice(-1)[0]);
+    url.search = search_params.toString();
+    let dalias = '<a class="yt-simple-endpoint style-scope yt-formatted-string" spellcheck="false" href="{0}" dir="auto">{1}</a> '.format(url.toString(), ep.epName);
+    page.desc+=dalias;
+  });
   csb(page);
 }
 
@@ -157,7 +190,7 @@ export const watch = (link, csb) => {
       function (response) {
         if (response != undefined && response != "") {
           let animeInfoPage = buildWatchMainPage(response);
-          let firstEpLink = animeInfoPage["animeEpisodes"][0]["epLink"];
+          let firstEpLink = animeInfoPage["firstEpLink"];
           // Fetch First Episode
           chrome.runtime.sendMessage(
             {

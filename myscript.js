@@ -82,7 +82,7 @@ function _pri(action) {
 
       // Optimize
       let f = node.querySelector("#channel-info");
-      if(f!=null) f.innerHTML = "";
+      if (f != null) f.innerHTML = "";
 
       let thOpt = node.querySelector("#thumbnail > yt-img-shadow");
       if (thOpt.classList.contains("empty")) {
@@ -177,6 +177,13 @@ function _pri(action) {
     }
   };
 
+  String.prototype.format = function() {
+      var formatted = this;
+      for( var arg in arguments ) {
+          formatted = formatted.replace("{" + arg + "}", arguments[arg]);
+      }
+      return formatted;
+  };
   function resizeIFrameToFitContent(iFrame) {
     iFrame.width = iFrame.contentWindow.document.body.scrollWidth;
     iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
@@ -185,14 +192,23 @@ function _pri(action) {
   const setWatchPlayer = (out) => {
     // Optimize
     detach("#chat");
-    //  detach("#sections");
-    //  detach("#items");
+    detach("#sections");
+    detach("#items");
     detach("#comments");
+    detach("#secondary");
     //  detach("#chips");
+    var element = document.querySelector("#items");
+    //element.parentElement.removeChild(element);
+    if (element != null) {
+      element.parentElement.querySelectorAll("*").forEach(function (node) {
+        node.remove();
+      });
+    }
+
 
     var element = document.querySelector("#top-row > ytd-video-owner-renderer");
     //element.parentElement.removeChild(element);
-    if(element != null){
+    if (element != null) {
       element.parentElement.querySelectorAll("*").forEach(function (node) {
         node.remove();
       });
@@ -222,8 +238,7 @@ function _pri(action) {
     let data = {
       set video(value) {
         let f = document.querySelector("#player-container-outer");
-        f.innerHTML =
-          '<iframe src="'+value+'" width="100%" height="500">';
+        f.innerHTML = '<iframe src="' + value + '" width="100%" height="500">';
         //resizeIFrameToFitContent(f);
         console.log(f);
       },
@@ -233,7 +248,10 @@ function _pri(action) {
       },
       set subtitle(value) {
         let f = document.querySelector("#description > yt-formatted-string");
-        if (f != null) f.innerHTML = value;
+        if (f != null) {
+          f.textContent = "";
+          f.innerHTML = value;
+        }
       },
       set hashtags(value) {
         let f = document.querySelector("#container > yt-formatted-string");
