@@ -1,6 +1,7 @@
 var base = "https://gogoanime2.org";
 
 function webScrapeImage(response) {
+  console.log("Scraping searches");
   var doc = new DOMParser().parseFromString(response, "text/html");
   var searchResults = [];
   let items = doc
@@ -16,133 +17,13 @@ function webScrapeImage(response) {
       };
       searchResults.push(t);
     });
-  // searchResults.forEach(function (arrayItem) {
-  //   var x = arrayItem.title;
-  //   console.log(x);
-  // });
   return searchResults;
 }
 
-function modifyVideoList(searchResults) {
-  var doc = document.querySelector("#contents");
-  var totalSearches = doc.length;
-
-  doc.querySelectorAll("ytd-video-renderer").forEach(function (node, index) {
-    detach("#channel-name > ytd-badge-supported-renderer > div > yt-icon");
-    detach("#overlays");
-    detach("#mouseover-overlay");
-    detach("#hover-overlays");
-    // Optimize
-    let thOpt = node.querySelector("#thumbnail > yt-img-shadow");
-    if (thOpt.classList.contains("empty")) {
-      thOpt.classList.remove("empty");
-    }
-
-    let data = {
-      get title() {
-        return node.querySelector("#video-title > yt-formatted-string")
-          .innerHTML;
-      },
-      set title(value) {
-        let f = node.querySelector("#video-title > yt-formatted-string");
-        if (f != null) f.innerHTML = value;
-      },
-
-      get views() {
-        return node.querySelector("#metadata-line > span:nth-child(1)")
-          .innerHTML;
-      },
-      set views(value) {
-        let f = node.querySelector("#metadata-line > span:nth-child(1)");
-        if (f != null) f.innerHTML = value;
-      },
-
-      get time() {
-        return node.querySelector("#metadata-line > span:nth-child(2)")
-          .innerHTML;
-      },
-      set time(value) {
-        let f = node.querySelector("#metadata-line > span:nth-child(2)");
-        if (f != null) f.innerHTML = value;
-      },
-
-      get link() {
-        return node.querySelector("#thumbnail").href;
-      },
-      set link(value) {
-        let f = node.querySelector("#thumbnail");
-        if (f != null) f.href = value;
-      },
-
-      get img() {
-        return node.querySelector("#img").src;
-      },
-      set img(value) {
-        let f = node.querySelector("#img");
-        if (f != null) f.src = value;
-        else {
-          console.log(index + " has null?");
-        }
-      },
-
-      get channel_img() {
-        return node.querySelector("#channel-info > a > yt-img-shadow > #img")
-          .src;
-      },
-      set channel_img(value) {
-        let f = node.querySelector("#channel-info > a > yt-img-shadow > #img");
-        if (f != null) f.src = value;
-      },
-
-      get channel_name() {
-        return node.querySelector("#text > a").innerHTML;
-      },
-      set channel_name(value) {
-        let f = node.querySelector("#text > a");
-        if (f != null) f.innerHTML = value;
-      },
-
-      get subtitle() {
-        return node.querySelector(
-          "#dismissible > div > div.metadata-snippet-container.style-scope.ytd-video-renderer > yt-formatted-string"
-        ).innerHTML;
-      },
-      set subtitle(value) {
-        let f = node.querySelector(
-          "#dismissible > div > div.metadata-snippet-container.style-scope.ytd-video-renderer > yt-formatted-string"
-        );
-        if (f != null) f.innerHTML = value;
-      },
-    };
-    data.title = "MANY-YT-VID ACTIVE";
-    data.subtitle = "-1";
-    data.time = "Infinity";
-    //    data.img = "https://wallpapercave.com/wp/wp5952080.jpg";
-
-    if (index > totalSearches || !searchResults[index]) return;
-
-    data.title = searchResults[index].title;
-    data.time = searchResults[index].release;
-    //  data.img = searchResults[index].image;
-    node.querySelector("#img").remove();
-    let x = node.querySelector("#thumbnail > yt-img-shadow");
-    var img = new Image();
-    img.src =
-      searchResults[index].image;
-    img.width = "360";
-    x.appendChild(img);
-  });
-}
-
-export const search = (query) => {
-  //let contents = detach("#contents");
-  var doc = document.querySelector("#contents");
-  doc
-    .querySelectorAll("ytd-playlist-renderer")
-    .forEach((node) => node.remove());
+export const search = (query, csb) => {
   //doc.querySelectorAll("ytd-video-renderer").forEach(node => node.remove());
   var search = base + "/search/" + encodeURIComponent(query);
-  console.log("Search url: " + search);
+  console.log("Searching "+search);
   chrome.runtime.sendMessage(
     {
       contentScriptQuery: "getScrape",
@@ -151,8 +32,147 @@ export const search = (query) => {
     function (response) {
       if (response != undefined && response != "") {
         let data = webScrapeImage(response);
-        modifyVideoList(data);
+        csb(data);
       }
     }
   );
+};
+
+const buildWatchMainPage = (pageData) => {
+  console.log("Building page indexes");
+  var doc = new DOMParser().parseFromString(pageData, "text/html");
+  let img =
+    base +
+    doc
+      .querySelector(
+        "#wrapper_bg > section > section.content_left > div.main_body > div.anime_info_body > div.anime_info_body_bg > img"
+      )
+      .getAttribute("src");
+  let animeName = doc.querySelector(
+    "#wrapper_bg > section > section.content_left > div.main_body > div.anime_info_body > div.anime_info_body_bg > h1"
+  ).innerHTML;
+  let animeType = doc
+    .querySelector(
+      "#wrapper_bg > section > section.content_left > div.main_body > div.anime_info_body > div.anime_info_body_bg > p:nth-child(3)"
+    )
+    .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
+    .trim();
+  let animePlot = doc
+    .querySelector(
+      "#wrapper_bg > section > section.content_left > div.main_body > div.anime_info_body > div.anime_info_body_bg > p:nth-child(4)"
+    )
+    .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
+    .trim();
+  let animeGenre = doc
+    .querySelector(
+      "#wrapper_bg > section > section.content_left > div.main_body > div.anime_info_body > div.anime_info_body_bg > p:nth-child(5)"
+    )
+    .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
+    .trim();
+  let animeReleased = doc
+    .querySelector(
+      "#wrapper_bg > section > section.content_left > div.main_body > div.anime_info_body > div.anime_info_body_bg > p:nth-child(6)"
+    )
+    .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
+    .trim();
+  let animeStatus = doc
+    .querySelector(
+      "#wrapper_bg > section > section.content_left > div.main_body > div.anime_info_body > div.anime_info_body_bg > p:nth-child(7)"
+    )
+    .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
+    .trim();
+  let animeOtherName = doc
+    .querySelector(
+      "#wrapper_bg > section > section.content_left > div.main_body > div.anime_info_body > div.anime_info_body_bg > p:nth-child(8)"
+    )
+    .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
+    .trim();
+
+  let episode_list = [];
+  let items = doc
+    .querySelectorAll("#episode_related > li")
+    .forEach(function (node, index) {
+      let t = {
+        epLink: base + node.querySelector("a").getAttribute("href"),
+        epName: node
+          .querySelector("a > div.name")
+          .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
+          .trim(),
+      };
+      episode_list.push(t);
+    });
+
+  let info = {
+    image: img,
+    animeName: animeName,
+    animeType: animeType,
+    animePlot: animePlot,
+    animeGenre: animeGenre,
+    animeReleased: animeReleased,
+    animeStatus: animeStatus,
+    animeOtherName: animeOtherName,
+    animeEpisodes: episode_list,
+  };
+
+  return info;
+};
+
+const buildWatchAnimePage = (pageData) => {
+  console.log("Building Anime Page");
+  var doc = new DOMParser().parseFromString(pageData, "text/html");
+
+  let title = doc.querySelector(
+    "#wrapper_bg > section > section.content_left > div:nth-child(1) > div.anime_video_body > h1"
+  ).innerHTML;
+
+  let vidLink = doc.querySelector("#playerframe").src;
+
+  let epData = {
+    title: title,
+    video: vidLink,
+  };
+  return epData;
+};
+
+function _mergeAndExecute(animeEpisodePage, animeInfoPage, csb){
+  let page = {
+    video: animeEpisodePage?.video,
+    hashtags: animeEpisodePage?.animeGenre,
+    title: animeEpisodePage?.title,
+    desc: animeInfoPage?.animePlot
+  };
+
+  csb(page);
+}
+
+export const watch = (link, csb) => {
+  console.log("Now watch! " + link);
+  let fullLink = base + link;
+  if (link.includes("anime")) {
+    chrome.runtime.sendMessage(
+      {
+        contentScriptQuery: "getScrape",
+        url: fullLink,
+      },
+      function (response) {
+        if (response != undefined && response != "") {
+          let animeInfoPage = buildWatchMainPage(response);
+          let firstEpLink = animeInfoPage["animeEpisodes"][0]["epLink"];
+          // Fetch First Episode
+          chrome.runtime.sendMessage(
+            {
+              contentScriptQuery: "getScrape",
+              //url: fullLink,
+              url: firstEpLink,
+            },
+            function (response) {
+              let animeEpisodePage = buildWatchAnimePage(response);
+              _mergeAndExecute(animeEpisodePage, animeInfoPage, csb);
+            }
+          );
+        }
+      }
+    );
+  } else if (link.includes("watch")) {
+  }
 };
