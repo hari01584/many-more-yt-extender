@@ -4,7 +4,7 @@ many-more-yt-extender
 Extends youtube interface (tweak it using extension) to enable playing of 3rd party providers video! Basically borrows youtube UI to play other source videos :D!!
 
 ![preview](https://github.com/hari01584/many-more-yt-extender/blob/main/preview/manymoreytext.gif)
-
+Youtube video [here](https://youtu.be/1T7WwMiXE34)
 Why?
 ---
 
