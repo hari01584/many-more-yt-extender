@@ -188,6 +188,7 @@ export const watch = (link, lastWatch, csb) => {
           else {
             var link = base + lastWatch;
           }
+          log(link);
           // Fetch First Episode
           chrome.runtime.sendMessage(
             {
