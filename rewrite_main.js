@@ -266,14 +266,20 @@ function _pri(q) {
     f.innerHTML = '<iframe src="' + out.video + '" frameborder="0" style="overflow:hidden;overflow-x:hidden;overflow-y:hidden;height:100%;width:100%;position:absolute;top:0px;left:0px;right:0px;bottom:0px" height="100%" width="100%">';
     // TODO REMOVE
     //sleep(3);
+    disconnect("#container > h1 > yt-formatted-string");
     f = document.querySelector("#container > h1 > yt-formatted-string");
-    if (f != null) f.innerHTML = out.title;
+    if (f != null) f.textContent = out.title;
     //sleep(3);
 
+    log("Debag");
+    console.log(document.body);
+    log("Debag");
+
+    //detach("#description > yt-formatted-string");
     f = document.querySelector("#description > yt-formatted-string");
     if (f != null) {
       f.textContent = "";
-      f.innerHTML = out.desc;
+      f.textContent = out.desc;
     }
     f = document.querySelector("#container > yt-formatted-string");
     if (f != null) f.innerHTML = out.hashtags ?? "undefined/no hashtags";
