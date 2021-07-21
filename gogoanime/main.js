@@ -130,7 +130,7 @@ const buildWatchAnimePage = (pageData) => {
       } else if (!capture) return;
 
       let t = {
-        epLink: node.querySelector("a").getAttribute("href"),
+        epLink: node.querySelector("a").getAttribute("href").trim(),
         epName: node
           .querySelector("a > div.name")
           .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
@@ -161,23 +161,20 @@ function _mergeAndExecute(animeEpisodePage, animeInfoPage, csb) {
         animeInfoPage?.animeOtherName
       ),
   };
-  page.desc += "\n\nEpisodes:\n";
+  page.extraVids = animeEpisodePage?.animeEpisodes;
 
-  var url_string = window.location.href;
-  var url = new URL(url_string);
-  var search_params = url.searchParams;
+  // animeEpisodePage?.animeEpisodes.forEach(function (ep, index) {
+  //   // Set action and change last history cursor
+  //   let dalias = '<a class="yt-simple-endpoint style-scope yt-formatted-string" spellcheck="false" customData="{0}" href="#" dir="auto">{1}</a> '.format(ep.epLink, ep.epName);
+  //   page.desc+=dalias;
+  // });
+  // page.desc += "</div>";
 
-  animeEpisodePage?.animeEpisodes.forEach(function (ep, index) {
-    search_params.set('t', ep.epLink.split('/').slice(-1)[0]);
-    url.search = search_params.toString();
-    let dalias = '<a class="yt-simple-endpoint style-scope yt-formatted-string" spellcheck="false" href="{0}" dir="auto">{1}</a> '.format(url.toString(), ep.epName);
-    page.desc+=dalias;
-  });
   csb(page);
 }
 
-export const watch = (link, csb) => {
-  log("Now watch! " + link);
+export const watch = (link, lastWatch, csb) => {
+  log("Now watch! " + link + ", LastSeen "+lastWatch);
   let fullLink = base + link;
   if (link.includes("anime")) {
     chrome.runtime.sendMessage(
@@ -187,14 +184,19 @@ export const watch = (link, csb) => {
       },
       function (response) {
         if (response != undefined && response != "") {
-          let animeInfoPage = buildWatchMainPage(response);
-          let firstEpLink = animeInfoPage["firstEpLink"];
+          let animeInfoPage = buildWatchMainPage(response, lastWatch);
+          if(lastWatch == null){
+            var link = animeInfoPage["firstEpLink"];
+          }
+          else {
+            var link = base + lastWatch;
+          }
           // Fetch First Episode
           chrome.runtime.sendMessage(
             {
               contentScriptQuery: "getScrape",
               //url: fullLink,
-              url: firstEpLink,
+              url: link,
             },
             function (response) {
               let animeEpisodePage = buildWatchAnimePage(response);

@@ -10,7 +10,7 @@
   "content_scripts": [{
   "matches": ["http://www.youtube.com/*","https://www.youtube.com/*"],
   "js": ["rewrite_main.js"],
-  "run_at": "document_idle"
+  "run_at": "document_end"
   }],
   "action": {
     "default_title": "Set video source",

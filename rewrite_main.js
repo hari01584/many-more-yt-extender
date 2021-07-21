@@ -7,6 +7,12 @@ function log(data) {
   console.log("ManyVidLog: " + data);
 }
 
+function sleep (seconds) {
+    var start = new Date().getTime();
+    while (new Date() < start + seconds*1000) {}
+    return 0;
+}
+
 function disconnect(node){
   let q = document.querySelector(node);
   if(q!=null){
@@ -78,6 +84,12 @@ function process() {
       } else if (params.has("search_query")) {
         SearchPage(params.get("search_query"), source);
       } else if (params.has("v")) {
+        if(params.has("t")){
+          params.delete("t");
+          log("Refreshing due to time parameter");
+          window.location.search = params.toString();
+          return;
+        }
         WatchPage(params.get("v"), source);
       }
     }
@@ -117,17 +129,22 @@ let SearchPage = (p, s) => {
 
 let WatchPage = (p, s) => {
   _pri("getSearchItem")(p, function (link) {
-    (async () => {
-      let filePath = s + "/" + "main.js";
-      const src = chrome.runtime.getURL(filePath);
-      const contentMain = await import(src);
-      contentMain.watch(link, _pri("setWatchPlayer"));
-    })();
+    window.animeLink = link;
+    _pri("_getLastWatch")(link, function(lastWatch){
+      (async () => {
+        let filePath = s + "/" + "main.js";
+        const src = chrome.runtime.getURL(filePath);
+        const contentMain = await import(src);
+        contentMain.watch(link, lastWatch, _pri("setWatchPlayer"));
+      })();
+    });
   });
 };
 
 function _pri(q) {
   let _map = {};
+  let _lastWatch = {};
+
   let _buildCache = (cbx) => {
     chrome.storage.local.set({ map: _map }, function () {
       cbx();
@@ -139,6 +156,19 @@ function _pri(q) {
       cbx();
     });
   };
+
+  let _getLastWatch = (v, cbx) => {
+    chrome.storage.local.get("lastWatch_"+v, function (ep) {
+      cbx(ep["lastWatch_"+v]);
+    });
+  }
+
+  let _setLastWatch = (v, ep, cbx) => {
+    log("_setLastWatch says setting pointer");
+    chrome.storage.local.set({["lastWatch_"+v]: ep }, function () {
+      cbx();
+    });
+  }
 
   const setDataSearches = (searchResults) => {
     log("Loaded, now parsing data for search results..!");
@@ -209,7 +239,7 @@ function _pri(q) {
     }
   };
 
-  const setWatchPlayer = (out) => {
+  const setWatchPlayer = (out, animeLink) => {
     detachAndDisconnect("#related");
     detachAndDisconnect("#comments");
     detachAndDisconnect("#secondary");
@@ -218,11 +248,14 @@ function _pri(q) {
     detach("#chat");
     detachRemoveNodes("#top-row > ytd-video-owner-renderer");
 
-    let f = document.querySelector("#player-container-outer");
+    let f = document.querySelector("#movie_player");
     f.innerHTML = '<iframe src="' + out.video + '" width="100%" height="500">';
-
+    // TODO REMOVE
+    //sleep(3);
     f = document.querySelector("#container > h1 > yt-formatted-string");
     if (f != null) f.innerHTML = out.title;
+    //sleep(3);
+
     f = document.querySelector("#description > yt-formatted-string");
     if (f != null) {
       f.textContent = "";
@@ -235,11 +268,40 @@ function _pri(q) {
     f = document.querySelector("#info-strings > yt-formatted-string");
     if(f!=null) f.textContent = out.time ?? "Infinity";
 
+    if (out.extraVids != null) {
+      let d = document.querySelector("#description > yt-formatted-string");
+      d.innerHTML += "\n\nEpisodes:\n";
+      var div = document.createElement('div');
+      div.id = 'customlinks';
+      d.appendChild(div);
+      out.extraVids.forEach(function (ep, index) {
+        var a = document.createElement('a');
+        var linkText = document.createTextNode(ep.epName + " ");
+        a.appendChild(linkText);
+        a.className = "yt-simple-endpoint style-scope yt-formatted-string";
+        a.index = index;
+        a.href = "javascript:void(0)";
+        a.addEventListener('click',function(){
+          _setLastWatch(window.animeLink, ep.epLink, function(){window.location.reload();});
+        });
+        div.appendChild(a);
+      });
+    }
+
+    // // Set event list\
+    // let q = document
+    //   .querySelectorAll("#customlinks > a")
+    //   .forEach((node) => {
+    //     console.log(node.textContent);
+    //   });
+
     console.log("DAAATAAAAAA");
   };
 
   if (q == "setDataSearches") return setDataSearches;
   else if (q == "getSearchItem") return getSearchItem;
   else if (q == "setWatchPlayer") return setWatchPlayer;
+  else if (q == "_setLastWatch") return _setLastWatch;
+  else if (q == "_getLastWatch") return _getLastWatch;
   return null;
 }
