@@ -124,10 +124,13 @@ const buildWatchAnimePage = (pageData) => {
     .forEach(function (node, index) {
       let cname = node.querySelector("a").className;
 
-      if (cname == "active") {
+      // if (cname == "active") {
+      //   capture = true;
+      //   return;
+      // } else if (!capture) return;
+      if(cname == "active"){
         capture = true;
-        return;
-      } else if (!capture) return;
+      } else capture = false;
 
       let t = {
         epLink: node.querySelector("a").getAttribute("href").trim(),
@@ -135,6 +138,7 @@ const buildWatchAnimePage = (pageData) => {
           .querySelector("a > div.name")
           .textContent.replace(/[\n\r]+|[\s]{2,}/g, " ")
           .trim(),
+        isHighlight: capture
       };
       episode_list.push(t);
     });
@@ -162,13 +166,6 @@ function _mergeAndExecute(animeEpisodePage, animeInfoPage, csb) {
       ),
   };
   page.extraVids = animeEpisodePage?.animeEpisodes;
-
-  // animeEpisodePage?.animeEpisodes.forEach(function (ep, index) {
-  //   // Set action and change last history cursor
-  //   let dalias = '<a class="yt-simple-endpoint style-scope yt-formatted-string" spellcheck="false" customData="{0}" href="#" dir="auto">{1}</a> '.format(ep.epLink, ep.epName);
-  //   page.desc+=dalias;
-  // });
-  // page.desc += "</div>";
 
   csb(page);
 }
