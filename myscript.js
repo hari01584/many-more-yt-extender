@@ -27,6 +27,9 @@ function createElementFromHTML(htmlString) {
   // Change this to div.childNodes to support multiple top-level nodes
   return div.firstChild;
 }
+function log(data) {
+  console.log("ManyVidLog: " + data);
+}
 
 function YTMainPage() {
   console.log("Youtube Main Page");
@@ -88,7 +91,6 @@ function _pri(action) {
       if (thOpt.classList.contains("empty")) {
         thOpt.classList.remove("empty");
       }
-
       let data = {
         set title(value) {
           let f = node.querySelector("#video-title > yt-formatted-string");
@@ -287,6 +289,11 @@ function SearchPage(query, source) {
     const contentMain = await import(src);
     contentMain.search(query, _pri("setDataSearches"));
   })();
+}
+
+function WatchPagePseduo(v, source) {
+  console.log("Pseudo Removeeeee");
+
 }
 
 function WatchPage(v, source) {

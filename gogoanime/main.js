@@ -1,7 +1,6 @@
 var base = "https://gogoanime2.org";
 
 function webScrapeImage(response) {
-  console.log("Scraping searches");
   var doc = new DOMParser().parseFromString(response, "text/html");
   var searchResults = [];
   let items = doc
@@ -23,7 +22,6 @@ function webScrapeImage(response) {
 export const search = (query, csb) => {
   //doc.querySelectorAll("ytd-video-renderer").forEach(node => node.remove());
   var search = base + "/search/" + encodeURIComponent(query);
-  console.log("Searching " + search);
   chrome.runtime.sendMessage(
     {
       contentScriptQuery: "getScrape",
@@ -38,8 +36,9 @@ export const search = (query, csb) => {
   );
 };
 
+
 const buildWatchMainPage = (pageData) => {
-  console.log("Building page indexes");
+  log("Building page indexes");
   var doc = new DOMParser().parseFromString(pageData, "text/html");
   let img =
     base +
@@ -110,7 +109,7 @@ const buildWatchMainPage = (pageData) => {
 };
 
 const buildWatchAnimePage = (pageData) => {
-  console.log("Building Anime Page");
+  log("Building Anime Page");
   var doc = new DOMParser().parseFromString(pageData, "text/html");
 
   let title = doc.querySelector(
@@ -165,7 +164,6 @@ function _mergeAndExecute(animeEpisodePage, animeInfoPage, csb) {
   page.desc += "\n\nEpisodes:\n";
 
   var url_string = window.location.href;
-  console.log(url_string);
   var url = new URL(url_string);
   var search_params = url.searchParams;
 
@@ -179,7 +177,7 @@ function _mergeAndExecute(animeEpisodePage, animeInfoPage, csb) {
 }
 
 export const watch = (link, csb) => {
-  console.log("Now watch! " + link);
+  log("Now watch! " + link);
   let fullLink = base + link;
   if (link.includes("anime")) {
     chrome.runtime.sendMessage(
