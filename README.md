@@ -21,7 +21,9 @@ Made in pure javascript(+ lil html) this extension uses DOM elements and js cont
 How to install?
 ----------------------------------------------
 
-I will keep this quick and simple, first download this repo as zip and extract it, then use [this](https://ui.vision/howto/install-chrome-extension-from-file) or [this](https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/) tutorials to install unpacked extension, Make sure to choose folder as the one which has *manifest.json*
+~~I will keep this quick and simple, first download this repo as zip and extract it, then use [this](https://ui.vision/howto/install-chrome-extension-from-file) or [this](https://webkul.com/blog/how-to-install-the-unpacked-extension-in-chrome/) tutorials to install unpacked extension, Make sure to choose folder as the one which has *manifest.json*~~
+
+Hurray! The extension is now officially avaliable at chrome web store! [click on this list](https://chrome.google.com/webstore/detail/many-more-yt-extender/pgpifnodlmdllbbbhgeggdhfifffadki) to redirect you to chrome store!
 
 How to use?
 ----------------------------------------------
