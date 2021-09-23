@@ -116,7 +116,7 @@ const buildWatchAnimePage = (pageData) => {
     "#wrapper_bg > section > section.content_left > div:nth-child(1) > div.anime_video_body > h1"
   ).innerHTML;
 
-  let vidLink = doc.querySelector("#playerframe").src;
+  let vidLink = base + doc.querySelector("#playerframe").getAttribute("src").trim();
   let episode_list = [];
   var capture = false;
   let items = doc
@@ -166,7 +166,6 @@ function _mergeAndExecute(animeEpisodePage, animeInfoPage, csb) {
       ),
   };
   page.extraVids = animeEpisodePage?.animeEpisodes;
-
   csb(page);
 }
 

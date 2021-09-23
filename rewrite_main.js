@@ -262,14 +262,13 @@ function _pri(q) {
     detachRemoveNodes("#top-row > ytd-video-owner-renderer");
 
 
-    let f = document.querySelector("#movie_player");
+    let f = document.querySelector("#player-container-inner");
     f.innerHTML = '<iframe src="' + out.video + '" frameborder="0" style="overflow:hidden;overflow-x:hidden;overflow-y:hidden;height:100%;width:100%;position:absolute;top:0px;left:0px;right:0px;bottom:0px" height="100%" width="100%">';
-    // TODO REMOVE
-    //sleep(3);
+
     disconnect("#container > h1 > yt-formatted-string");
     f = document.querySelector("#container > h1 > yt-formatted-string");
     if (f != null) f.textContent = out.title;
-    //sleep(3);
+
 
     log("Debag");
     console.log(document.body);
@@ -312,15 +311,6 @@ function _pri(q) {
         div.appendChild(a);
       });
     }
-
-    // // Set event list\
-    // let q = document
-    //   .querySelectorAll("#customlinks > a")
-    //   .forEach((node) => {
-    //     console.log(node.textContent);
-    //   });
-
-    console.log("DAAATAAAAAA");
   };
 
   if (q == "setDataSearches") return setDataSearches;
