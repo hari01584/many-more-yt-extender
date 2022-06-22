@@ -265,29 +265,31 @@ function _pri(q) {
     let f = document.querySelector("#player-container-inner");
     f.innerHTML = '<iframe src="' + out.video + '" frameborder="0" style="overflow:hidden;overflow-x:hidden;overflow-y:hidden;height:100%;width:100%;position:absolute;top:0px;left:0px;right:0px;bottom:0px" height="100%" width="100%">';
 
-    disconnect("#container > h1 > yt-formatted-string");
-    f = document.querySelector("#container > h1 > yt-formatted-string");
+    disconnect("#title > h1 > yt-formatted-string");
+    f = document.querySelector("#title > h1 > yt-formatted-string");
     if (f != null) f.textContent = out.title;
 
-
+    detachAndDisconnect("#formatted-snippet-text");
+    detachAndDisconnect("#owner-and-teaser");
+    detachAndDisconnect("#actions");
     log("Debag");
     console.log(document.body);
     log("Debag");
 
     //detach("#description > yt-formatted-string");
-    f = document.querySelector("#description > yt-formatted-string");
-    if (f != null) {
-      f.textContent = "";
-      f.textContent = out.desc;
-    }
-    f = document.querySelector("#container > yt-formatted-string");
+
+    f = document.querySelector("#title > yt-formatted-string");
     if (f != null) f.innerHTML = out.hashtags ?? "undefined/no hashtags";
     f = document.querySelector("#count > ytd-video-view-count-renderer > span.view-count.style-scope.ytd-video-view-count-renderer");
     if(f!=null) f.textContent = out.views ?? "Infinity";
     f = document.querySelector("#info-strings > yt-formatted-string");
     if(f!=null) f.textContent = out.time ?? "Infinity";
 
-    let d = document.querySelector("#description > yt-formatted-string");
+    let d = document.querySelector("#description-inline-expander");
+    if (d != null) {
+      d.textContent = '';
+      d.textContent = out.desc;
+    }
     if (out.extraVids != null && d!=null) {
       d.innerHTML += "\n\nEpisodes:\n";
       var div = document.createElement('div');
